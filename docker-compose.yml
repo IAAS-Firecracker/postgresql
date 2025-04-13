@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: postgres
+    environment:
+      POSTGRES_USER: firecracker
+      POSTGRES_PASSWORD: fireCracker
+      POSTGRES_DB: firecracker
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - iaas-firecracker-network
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@gmail.com
+      PGADMIN_DEFAULT_PASSWORD: admin123
+    ports:
+      - "8888:80"
+    depends_on:
+      - postgres
+    networks:
+      - iaas-firecracker-network
+
+volumes:
+  postgres_data:
+
+networks:
+  iaas-firecracker-network:
+    external: true
+    name: iaas-firecracker-network  # Replace with actual network name
