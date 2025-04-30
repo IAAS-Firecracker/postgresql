@@ -28,8 +28,34 @@ services:
     networks:
       - iaas-firecracker-network
 
+### Service Cluster Database ###
+
+  mysql_db_service_cluster:
+    restart: always
+    image: mysql:8.0
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      MYSQL_DATABASE: service_cluster_db
+      MYSQL_ROOT_PASSWORD: firecracker
+      MYSQL_PASSWORD: firecracker
+      MYSQL_USER: firecracker
+    ports:
+      - "13306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p$MYSQL_ROOT_PASSWORD"]
+      interval: 5s
+      timeout: 10s
+      retries: 10
+    networks:
+      - iaas-firecracker-network
+
+
+
 volumes:
   postgres_data:
+  mysql_data:
 
 networks:
   iaas-firecracker-network:
