@@ -13,7 +13,7 @@ services:
     ports:
       - "5432:5432"
     networks:
-      - iaas-firecracker-network
+      - iaas-firecracker-networkd
 
   pgadmin:
     image: dpage/pgadmin4
@@ -44,7 +44,7 @@ services:
     volumes:
       - mysql_data:/var/lib/mysql
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p$MYSQL_ROOT_PASSWORD"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p$$MYSQL_ROOT_PASSWORD"]
       interval: 5s
       timeout: 10s
       retries: 10
@@ -66,7 +66,7 @@ services:
     volumes:
       - mysql_data_vm_host:/var/lib/mysql
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p$MYSQL_ROOT_PASSWORD"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p$$MYSQL_ROOT_PASSWORD"]
       interval: 5s
       timeout: 10s
       retries: 10
@@ -89,7 +89,7 @@ services:
     volumes:
       - mysql_data_vm_offer:/var/lib/mysql
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p$MYSQL_ROOT_PASSWORD"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p$$MYSQL_ROOT_PASSWORD"]
       interval: 5s
       timeout: 10s
       retries: 10
@@ -112,10 +112,30 @@ services:
     volumes:
       - mysql_data_system_image:/var/lib/mysql
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p$MYSQL_ROOT_PASSWORD"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p$$MYSQL_ROOT_PASSWORD"]
       interval: 5s
       timeout: 10s
       retries: 10
+    networks:
+      - iaas-firecracker-network
+
+### Service PHPMyAdmin ###
+
+  phpmyadmin:
+    restart: always
+    image: phpmyadmin/phpmyadmin:latest
+    environment:
+      PMA_HOST: mysql_db_service_vm_host
+      PMA_HOSTS: mysql_db_service_cluster,mysql_db_service_vm_host,mysql_db_service_vm_offer,mysql_db_service_system_image
+      PMA_USER: firecracker
+      PMA_PASSWORD: firecracker
+    ports:
+      - "7000:80"
+    depends_on:
+      - mysql_db_service_cluster
+      - mysql_db_service_vm_host
+      - mysql_db_service_vm_offer
+      - mysql_db_service_system_image
     networks:
       - iaas-firecracker-network
 
