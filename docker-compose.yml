@@ -13,7 +13,7 @@ services:
     ports:
       - "5432:5432"
     networks:
-      - iaas-firecracker-networkd
+      - iaas-firecracker-network
 
   pgadmin:
     image: dpage/pgadmin4
