@@ -28,28 +28,7 @@ services:
     networks:
       - iaas-firecracker-network
 
-### Service Cluster Database ###
 
-  mysql_db_service_cluster:
-    restart: always
-    image: mysql:8.0
-    command: --default-authentication-plugin=mysql_native_password
-    environment:
-      MYSQL_DATABASE: service_cluster_db
-      MYSQL_ROOT_PASSWORD: firecracker
-      MYSQL_PASSWORD: firecracker
-      MYSQL_USER: firecracker
-    ports:
-      - "13306:3306"
-    volumes:
-      - mysql_data:/var/lib/mysql
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p$$MYSQL_ROOT_PASSWORD"]
-      interval: 5s
-      timeout: 10s
-      retries: 10
-    networks:
-      - iaas-firecracker-network
 
 
   mysql_db_service_vm_host:
@@ -77,26 +56,6 @@ services:
 
 ### Service System Image Database ###
 
-  mysql_db_service_system_image:
-    restart: always
-    image: mysql:8.0
-    command: --default-authentication-plugin=mysql_native_password
-    environment:
-      MYSQL_DATABASE: service_system_image_db
-      MYSQL_ROOT_PASSWORD: firecracker
-      MYSQL_PASSWORD: firecracker
-      MYSQL_USER: firecracker
-    ports:
-      - "13309:3306"
-    volumes:
-      - mysql_data_system_image:/var/lib/mysql
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p$$MYSQL_ROOT_PASSWORD"]
-      interval: 5s
-      timeout: 10s
-      retries: 10
-    networks:
-      - iaas-firecracker-network
 
 ### Service PHPMyAdmin ###
 
@@ -110,9 +69,7 @@ services:
     ports:
       - "7000:80"
     depends_on:
-      - mysql_db_service_cluster
       - mysql_db_service_vm_host
-      - mysql_db_service_system_image
     networks:
       - iaas-firecracker-network
 
@@ -122,9 +79,8 @@ volumes:
   postgres_data:
   mysql_data:
   mysql_data_vm_host:
-  mysql_data_system_image:
 
 networks:
   iaas-firecracker-network:
-    # external: true
-    # name: service-config_iaas-firecracker-network  # Replace with actual network name
+    external: true
+    name: service-config_iaas-firecracker-network  # Replace with actual network name
