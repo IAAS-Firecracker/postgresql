@@ -28,8 +28,57 @@ services:
     networks:
       - iaas-firecracker-network
 
+
+
+
+  mysql_db_service_vm_host:
+    restart: always
+    image: mysql:8.0
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      MYSQL_DATABASE: service_vm_host_db
+      MYSQL_ROOT_PASSWORD: firecracker
+      MYSQL_PASSWORD: firecracker
+      MYSQL_USER: firecracker
+    ports:
+      - "13307:3306"
+    volumes:
+      - mysql_data_vm_host:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p$$MYSQL_ROOT_PASSWORD"]
+      interval: 5s
+      timeout: 10s
+      retries: 10
+    networks:
+      - iaas-firecracker-network
+
+
+
+### Service System Image Database ###
+
+
+### Service PHPMyAdmin ###
+
+  phpmyadmin:
+    restart: always
+    image: phpmyadmin/phpmyadmin:latest
+    environment:
+      PMA_HOST: mysql_db_service_vm_host
+      PMA_USER: firecracker
+      PMA_PASSWORD: firecracker
+    ports:
+      - "7000:80"
+    depends_on:
+      - mysql_db_service_vm_host
+    networks:
+      - iaas-firecracker-network
+
+
+
 volumes:
   postgres_data:
+  mysql_data:
+  mysql_data_vm_host:
 
 networks:
   iaas-firecracker-network:
